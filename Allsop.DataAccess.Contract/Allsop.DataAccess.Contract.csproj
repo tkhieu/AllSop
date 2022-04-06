@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Allsop.DataAccess.Model\Allsop.DataAccess.Model.csproj" />
+    <ProjectReference Include="..\Allsop.Service.Contract.Model\Allsop.Service.Contract.Model.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <PackageReference Include="Moq" Version="4.17.2" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="Scrutor" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Allsop.DataAccess.Contract\Allsop.DataAccess.Contract.csproj" />
+    <ProjectReference Include="..\Allsop.DataAccess.Model\Allsop.DataAccess.Model.csproj" />
+    <ProjectReference Include="..\Allsop.DataAccess.Repository\Allsop.DataAccess.Repository.csproj" />
+    <ProjectReference Include="..\Allsop.Tests.Helpers\Allsop.Tests.Helpers.csproj" />
+  </ItemGroup>
+
+</Project>

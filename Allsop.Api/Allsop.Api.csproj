@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="10.0.1" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.3" />
+    <PackageReference Include="Scrutor" Version="4.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Allsop.Common\Allsop.Common.csproj" />
+    <ProjectReference Include="..\Allsop.DataAccess.Contract\Allsop.DataAccess.Contract.csproj" />
+    <ProjectReference Include="..\Allsop.DataAccess.Repository\Allsop.DataAccess.Repository.csproj" />
+    <ProjectReference Include="..\Allsop.Domain.Contract\Allsop.Domain.Contract.csproj" />
+    <ProjectReference Include="..\Allsop.Domain\Allsop.Domain.csproj" />
+    <ProjectReference Include="..\Allsop.Tests.Helpers\Allsop.Tests.Helpers.csproj" />
+  </ItemGroup>
+
+</Project>
