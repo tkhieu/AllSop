@@ -5,10 +5,11 @@ namespace Allsop.Service.Contract
     public interface IPromotionService
     {
         Task<IEnumerable<Promotion>> GetAllPromotionsAsync();
-        Task<decimal> GetTotalDiscountAmount(ShoppingCart shoppingCart);
-        Task<decimal> GetDiscountAmountByVoucher(ShoppingCart shoppingCart, Promotion promotion);
-        Task<decimal> GetDiscountAmountByPercent(ShoppingCart shoppingCart, Promotion promotion);
-        Task<decimal> GetDiscountAmountByAmount(ShoppingCart shoppingCart, Promotion promotion);
+        Task<Promotion> GetPromotionByVoucherAsync(string voucher);
+        Task<bool> CheckValidVoucherAsync(string voucher);
+        Task<decimal> GetDiscountAmountByVoucher(string voucher, decimal spendAmount, Promotion promotion);
+        Task<decimal> GetDiscountAmountByPercent(Guid categoryId, int spendQuantity, Promotion promotion);
+        Task<decimal> GetDiscountAmountByAmount(Guid categoryId, decimal spendAmount, Promotion promotion);
     }
 
 }

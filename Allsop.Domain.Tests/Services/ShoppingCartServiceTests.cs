@@ -24,27 +24,73 @@ namespace Allsop.Domain.Tests.Services
         private IMemoryCache _cache;
         private Guid _percentDiscountCategryId = Guid.NewGuid();
         private Guid _amountDiscountCategryId = Guid.NewGuid();
-        private Guid _userId = Guid.NewGuid();
+        private Guid _userId1 = Guid.NewGuid();
+        private Guid _userId2 = Guid.NewGuid();
+        private Guid _userId3 = Guid.NewGuid();
         private Guid _productId1 = Guid.NewGuid();
         private Guid _productId2 = Guid.NewGuid();
         private Guid _categoryId = Guid.NewGuid();
-        private string _voucher = "20OFFPROMO";
+        private const string _voucher = "20OFFPROMO";
 
         [SetUp]
         public void Setup()
         {
             _cache = new MemoryCache(new MemoryCacheOptions());
             _shoppingCartRepositoryMock = new Mock<IShoppingCartRepository>();
-            _shoppingCartRepositoryMock.Setup(m => m.GetShoppingCartByUserIdAsync(It.IsAny<Guid>())).Returns(() => Task.FromResult(new ShoppingCart()
+            /*Test Use case
+            Get 10% off bulk drinks – any drinks are 10% off the listed price (including already reduced 
+            items) when buying 10 or more
+            */
+            _shoppingCartRepositoryMock.Setup(m => m.GetShoppingCartByUserIdAsync(It.Is<Guid>(x => x == _userId1))).Returns(() => Task.FromResult(new ShoppingCart()
             {
                 Id = Guid.NewGuid(),
-                UserId = _userId,
+                UserId = _userId1,
                 ShoppingCartItems = new List<ShoppingCartItem>()
                 {
                     new ShoppingCartItem()
                     {
                         Id = Guid.NewGuid(),
                         ProductId = _productId1,
+                        Price = 100m,
+                        Quantity = 9,
+                        CategoryId = _percentDiscountCategryId, //Drinks
+                    }
+                }
+            }));
+            /*Test Use case
+            £5.00 off your order when spending £50.00 or more on Baking/Cooking Ingredients
+            */
+            _shoppingCartRepositoryMock.Setup(m => m.GetShoppingCartByUserIdAsync(It.Is<Guid>(x => x == _userId2))).Returns(() => Task.FromResult(new ShoppingCart()
+            {
+                Id = Guid.NewGuid(),
+                UserId = _userId2,
+                ShoppingCartItems = new List<ShoppingCartItem>()
+                {
+                    new ShoppingCartItem()
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = _productId2,
+                        Price = 100m,
+                        Quantity = 9,
+                        CategoryId = _percentDiscountCategryId, //Baking/Cooking
+                    }
+                }
+            }));
+            /*Test Use case
+            £20.00 off your total order value when spending £100.00 or more and using the code 
+            20OFFPROMO”
+            */
+            _shoppingCartRepositoryMock.Setup(m => m.GetShoppingCartByUserIdAsync(It.Is<Guid>(x => x == _userId3))).Returns(() => Task.FromResult(new ShoppingCart()
+            {
+                Id = Guid.NewGuid(),
+                UserId = _userId3,
+                ShoppingCartItems = new List<ShoppingCartItem>()
+                {
+                    new ShoppingCartItem()
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = _productId1,
+                        CategoryId = _percentDiscountCategryId, //Drinks
                         Quantity = 9
                     }
                 }
@@ -78,15 +124,26 @@ namespace Allsop.Domain.Tests.Services
                 }
             }.AsEnumerable()));
             _productRepositoryMock = new Mock<IProductRepository>();
-            _productRepositoryMock.Setup(m => m.GetProductAsync(It.IsAny<Guid>())).Returns(() =>
+            _productRepositoryMock.Setup(m => m.GetProductAsync(It.Is<Guid>(x => x == _productId1))).Returns(() =>
+                  Task.FromResult(new Product()
+                  {
+                      Id = _productId1,
+                      Name = "Product 1",
+                      Price = 100m,
+                      Quantity = 10,
+                      CategoryId = _percentDiscountCategryId,
+                      Category = new Category() { Id = _percentDiscountCategryId, Name = "Drinks" }
+
+                  }));
+            _productRepositoryMock.Setup(m => m.GetProductAsync(It.Is<Guid>(x => x == _productId2))).Returns(() =>
                 Task.FromResult(new Product()
                 {
-                    Id = _productId1,
-                    Name = "Test",
-                    Price = 10,
+                    Id = _productId2,
+                    Name = "Product 2",
+                    Price = 100m,
                     Quantity = 10,
-                    CategoryId = _categoryId,
-                    Category = new Category() { Id = _categoryId, Name = "Category" }
+                    CategoryId = _amountDiscountCategryId,
+                    Category = new Category() { Id = _amountDiscountCategryId, Name = "Baking/Cooking" }
 
                 }));
             _productRepositoryMock.Setup(m => m.IncreaseQuantity(It.IsAny<Guid>(), It.IsAny<byte>())).Returns(() => Task.FromResult(new Product()
@@ -123,7 +180,7 @@ namespace Allsop.Domain.Tests.Services
         [Test]
         public async Task AddProductToShoppingCart_WithExistingProduct_ShouldAddSuccessfullyAsync()
         {
-            var shoppingCart = await _shoppingCartService.AddProductAsync(_productId1, 1, _userId);
+            var shoppingCart = await _shoppingCartService.AddProductAsync(_productId1, 1, _userId1);
 
             Assert.IsNotNull(shoppingCart);
             Assert.AreEqual(10, shoppingCart.TotalItems);
@@ -135,7 +192,7 @@ namespace Allsop.Domain.Tests.Services
         [Test]
         public async Task ApplyVoucherToShoppingCart_WithValidVoucher_ShouldApplySuccessfullyAsync()
         {
-            var shoppingCart = await _shoppingCartService.ApplyVoucherAsync(_voucher, _userId);
+            var shoppingCart = await _shoppingCartService.ApplyVoucherAsync(_voucher, _userId1);
 
             Assert.IsNotNull(shoppingCart);
             Assert.AreEqual(9, shoppingCart.TotalItems);
@@ -147,13 +204,13 @@ namespace Allsop.Domain.Tests.Services
         [Test]
         public async Task ApplyVoucherToShoppingCart_WithInvalidVoucher_ShouldApplyThrowExceptionAsync()
         {
-            Assert.ThrowsAsync<VoucherNotFoundException>(() => _shoppingCartService.ApplyVoucherAsync("InvalidVoucher", _userId));
+            Assert.ThrowsAsync<InvalidVoucherException>(() => _shoppingCartService.ApplyVoucherAsync("InvalidVoucher", _userId1));
         }
 
         [Test]
         public async Task AddProductToShoppingCart_PercentDiscount_ShouldUpdateSuccessfullyAsync()
         {
-            var shoppingCart = await _shoppingCartService.AddProductAsync(_productId1, 1, _userId);
+            var shoppingCart = await _shoppingCartService.AddProductAsync(_productId1, 1, _userId1);
 
             Assert.IsNotNull(shoppingCart);
             Assert.AreEqual(1, shoppingCart.ShoppingCartItems.Count);
@@ -164,31 +221,41 @@ namespace Allsop.Domain.Tests.Services
         }
 
         [Test]
-        public async Task RemoveProductOutOfShoppingCart_PercentDiscount_ShouldUpdateSuccessfullyAsync()
+        public async Task AddProductToShoppingCart_AmountDiscount_ShouldApplySuccessfullyAsync()
         {
-            _shoppingCartRepositoryMock.Setup(m => m.GetShoppingCartByUserIdAsync(It.IsAny<Guid>())).Returns(() => Task.FromResult(new ShoppingCart()
+            var shoppingCart = await _shoppingCartService.AddProductAsync(_productId2, 1, _userId2);
+
+            Assert.IsNotNull(shoppingCart);
+            Assert.AreEqual(1, shoppingCart.ShoppingCartItems.Count);
+            Assert.AreEqual(10, shoppingCart.TotalItems);
+            Assert.AreEqual(1000, shoppingCart.SubTotal);
+            Assert.AreEqual(100, shoppingCart.DiscountAmount);
+            Assert.AreEqual(null, shoppingCart.Voucher);
+        }
+
+        [Test]
+        public async Task RemoveProductOutOfShoppingCart_AmountDiscount_ShouldUpdateSuccessfullyAsync()
+        {
+            var userId = Guid.NewGuid();
+            _shoppingCartRepositoryMock.Setup(m => m.GetShoppingCartByUserIdAsync(It.Is<Guid>(x => x == userId))).Returns(() => Task.FromResult(new ShoppingCart()
             {
                 Id = Guid.NewGuid(),
-                UserId = _userId,
-                DiscountAmount = 10,
+                UserId = userId,
+                DiscountAmount = 100m,
                 ShoppingCartItems = new List<ShoppingCartItem>()
                 {
                     new ShoppingCartItem()
                     {
                         Id = Guid.NewGuid(),
                         ProductId = _productId1,
-                        Quantity = 9
-                    },
-                    new ShoppingCartItem()
-                    {
-                        Id = Guid.NewGuid(),
-                        ProductId = _productId2,
-                        Quantity = 1
+                        Price = 100m,
+                        Quantity = 10,
+                        CategoryId = _percentDiscountCategryId
                     }
                 }
             }));
 
-            var shoppingCart = await _shoppingCartService.RemoveProductAsync(_productId2, 1, _userId);
+            var shoppingCart = await _shoppingCartService.RemoveProductAsync(_productId1, 1, userId);
 
             Assert.IsNotNull(shoppingCart);
             Assert.AreEqual(1, shoppingCart.ShoppingCartItems.Count);
@@ -196,95 +263,12 @@ namespace Allsop.Domain.Tests.Services
             Assert.AreEqual(900, shoppingCart.SubTotal);
             Assert.AreEqual(0, shoppingCart.DiscountAmount);
             Assert.AreEqual(null, shoppingCart.Voucher);
-
-        }
-
-        [Test]
-        public async Task AddProductToShoppingCart_AmountDiscount_ShouldApplySuccessfullyAsync()
-        {
-            _shoppingCartRepositoryMock.Setup(m => m.GetShoppingCartByUserIdAsync(It.IsAny<Guid>())).Returns(() => Task.FromResult(new ShoppingCart()
-            {
-                Id = Guid.NewGuid(),
-                UserId = _userId,
-                ShoppingCartItems = new List<ShoppingCartItem>()
-                {
-                    new ShoppingCartItem()
-                    {
-                        Id = Guid.NewGuid(),
-                        ProductId = _productId1,
-                        Quantity = 9
-                    }
-                }
-            }));
-
-            var shoppingCart = await _shoppingCartService.AddProductAsync(_productId1, 1, _userId);
-
-            Assert.IsNotNull(shoppingCart);
-            Assert.AreEqual(1, shoppingCart.ShoppingCartItems.Count);
-            Assert.AreEqual(10, shoppingCart.TotalItems);
-            Assert.AreEqual(1000, shoppingCart.SubTotal);
-            Assert.AreEqual(5, shoppingCart.DiscountAmount);
-            Assert.AreEqual(null, shoppingCart.Voucher);
-        }
-
-        [Test]
-        public async Task RemoveProductOutOfShoppingCart_AmountDiscount_ShouldUpdateSuccessfullyAsync()
-        {
-            _shoppingCartRepositoryMock.Setup(m => m.GetShoppingCartByUserIdAsync(It.IsAny<Guid>())).Returns(() => Task.FromResult(new ShoppingCart()
-            {
-                Id = Guid.NewGuid(),
-                UserId = _userId,
-                DiscountAmount = 5,
-                ShoppingCartItems = new List<ShoppingCartItem>()
-                {
-                    new ShoppingCartItem()
-                    {
-                        Id = Guid.NewGuid(),
-                        ProductId = _productId1,
-                        Quantity = 3
-                    }
-                }
-            }));
-
-            var shoppingCart = await _shoppingCartService.RemoveProductAsync(_productId1, 1, _userId);
-
-            Assert.IsNotNull(shoppingCart);
-            Assert.AreEqual(1, shoppingCart.ShoppingCartItems.Count);
-            Assert.AreEqual(2, shoppingCart.TotalItems);
-            Assert.AreEqual(40, shoppingCart.SubTotal);
-            Assert.AreEqual(0, shoppingCart.DiscountAmount);
-            Assert.AreEqual(null, shoppingCart.Voucher);
         }
 
         [Test]
         public async Task AddProductToShoppingCart_WithOutOfStock_ShouldThrowExceptionAsync()
         {
-            _shoppingCartRepositoryMock.Setup(m => m.GetShoppingCartByUserIdAsync(It.IsAny<Guid>())).Returns(() => Task.FromResult(new ShoppingCart()
-            {
-                Id = Guid.NewGuid(),
-                UserId = _userId,
-                DiscountAmount = 0m,
-                ShoppingCartItems = new List<ShoppingCartItem>()
-                {
-                    new ShoppingCartItem()
-                    {
-                        Id = Guid.NewGuid(),
-                        ProductId = _productId1,
-                        Quantity = 10
-                    }
-                }
-            }));
-
-            var product = new Product()
-            {
-                Id = _productId1,
-                Quantity = 1,
-                Price = 100m,
-                Name = "Test",
-                CategoryId = _amountDiscountCategryId
-            };
-
-            Assert.ThrowsAsync<OutOfStockException>(() => _shoppingCartService.AddProductAsync(_productId1, 1, _userId));
+            Assert.ThrowsAsync<OutOfStockException>(() => _shoppingCartService.AddProductAsync(_productId1, 11, _userId1));
         }
     }
 }

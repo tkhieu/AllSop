@@ -1,4 +1,5 @@
-﻿using Allsop.Common.Exception;
+﻿using Allsop.Common.Enums;
+using Allsop.Common.Exception;
 using Allsop.DataAccess.Contract.Repository;
 using Allsop.Service.Contract;
 using Allsop.Service.Contract.Model;
@@ -20,7 +21,7 @@ namespace Allsop.Domain.Services
             _productService = productService;
         }
 
-        public  Task<ShoppingCart> GetShoppingCartByUserIdAsync(Guid userId)
+        public Task<ShoppingCart> GetShoppingCartByUserIdAsync(Guid userId)
             => _shoppingCartRepository.GetShoppingCartByUserIdAsync(userId);
 
         public Task<IEnumerable<ShoppingCart>> GetAllShoppingCartsAsync()
@@ -30,16 +31,16 @@ namespace Allsop.Domain.Services
         {
             var shoppingCart = await _shoppingCartRepository.GetShoppingCartByUserIdAsync(userId);
             var item = shoppingCart.ShoppingCartItems.FirstOrDefault(x => x.ProductId == productId);
+            var product = await _productService.GetProductAsync(productId);
 
             if (item != null)
             {
-                if (item.Quantity < quantity)
+                if (product.Quantity < quantity)
                 {
                     throw new OutOfStockException(item.ProductId.ToString());
                 }
 
                 item.Quantity += quantity;
-                item.Quantity -= quantity;
             }
             else
             {
@@ -54,7 +55,7 @@ namespace Allsop.Domain.Services
                 shoppingCart.ShoppingCartItems.Add(item);
             }
 
-            shoppingCart.DiscountAmount = await _promotionService.GetTotalDiscountAmount(shoppingCart);
+            shoppingCart.DiscountAmount = await GetTotalDiscountAmount(shoppingCart);
 
             await _shoppingCartItemService.CreateOrUpdateShoppingCartItemAsync(item);
             await _productService.IncreaseQuantity(productId, quantity);
@@ -67,6 +68,7 @@ namespace Allsop.Domain.Services
         {
             var shoppingCart = await _shoppingCartRepository.GetShoppingCartByUserIdAsync(userId);
             var item = shoppingCart.ShoppingCartItems.FirstOrDefault(x => x.ProductId == productId);
+            var decreasedQuantity = 0;
 
             if (item == null)
             {
@@ -76,41 +78,84 @@ namespace Allsop.Domain.Services
             if (item.Quantity <= quantity)
             {
                 shoppingCart.ShoppingCartItems.Remove(item);
+                decreasedQuantity = item.Quantity;
             }
             else
             {
                 item.Quantity -= quantity;
-                item.Quantity += quantity;
+                decreasedQuantity = quantity;
             }
 
-            shoppingCart.DiscountAmount = await _promotionService.GetTotalDiscountAmount(shoppingCart);
+            shoppingCart.DiscountAmount = await GetTotalDiscountAmount(shoppingCart);
 
-            await _productService.DecreaseQuantity(productId, quantity);
+            await _productService.DecreaseQuantity(productId, decreasedQuantity);
             await _shoppingCartItemService.UpdateShoppingCartItemAsync(item);
             await _shoppingCartRepository.UpdateShoppingCartAsync(shoppingCart);
 
             return shoppingCart;
         }
 
-
         public async Task<ShoppingCart> ApplyVoucherAsync(string voucher, Guid userId)
         {
-            var shoppingCart = await _shoppingCartRepository.GetShoppingCartByUserIdAsync(userId);
-            var promotions = await _promotionService.GetAllPromotionsAsync();
-            var promotion = promotions.FirstOrDefault(x =>
-                string.Equals(x.Voucher, voucher, StringComparison.InvariantCultureIgnoreCase));
+            await _promotionService.CheckValidVoucherAsync(voucher);
 
-            if (promotion == null)
-            {
-                throw new VoucherNotFoundException(voucher);
-            }
+            var shoppingCart = await _shoppingCartRepository.GetShoppingCartByUserIdAsync(userId);
 
             shoppingCart.Voucher = voucher;
-            shoppingCart.DiscountAmount = await _promotionService.GetDiscountAmountByVoucher(shoppingCart, promotion);
+            shoppingCart.DiscountAmount = await GetTotalDiscountAmount(shoppingCart);
 
             await _shoppingCartRepository.UpdateShoppingCartAsync(shoppingCart);
 
             return shoppingCart;
+        }
+
+        private async Task<decimal> GetTotalDiscountAmount(ShoppingCart shoppingCart)
+        {
+            var totalDiscountAmount = 0m;
+            var promotions = await _promotionService.GetAllPromotionsAsync();
+
+            foreach (var promotion in promotions)
+            {
+                _ = promotion.PromotionType switch
+                {
+                    PromotionType.Amount => totalDiscountAmount += await GetDiscountAmountByAmount(shoppingCart, promotion),
+                    PromotionType.Percent => totalDiscountAmount += await GetDiscountAmountByPercent(shoppingCart, promotion),
+                    _ => totalDiscountAmount += await _promotionService.GetDiscountAmountByVoucher(shoppingCart.Voucher, shoppingCart.SubTotal, promotion)
+                };
+            };
+
+            return totalDiscountAmount;
+        }
+
+        private async Task<decimal> GetDiscountAmountByAmount(ShoppingCart shoppingCart, Promotion promotion)
+        {
+            var items = shoppingCart.ShoppingCartItems.Where(x => x.CategoryId == promotion.CategoryId);
+            var discountAmount = 0m;
+
+            if (items.Sum(x => x.Amount) >= promotion.SpendAmount)
+            {
+
+                return promotion.DiscountAmount;
+            }
+
+            return discountAmount;
+        }
+
+        private async Task<decimal> GetDiscountAmountByPercent(ShoppingCart shoppingCart, Promotion promotion)
+        {
+            var items = shoppingCart.ShoppingCartItems.Where(x => x.CategoryId == promotion.CategoryId);
+            var discountAmount = 0m;
+
+            if (items.Sum(x => x.Quantity) >= promotion.SpendQuantity)
+            {
+
+                foreach (var shoppingCartItem in items)
+                {
+                    discountAmount += (shoppingCartItem.Quantity * shoppingCartItem.Price * promotion.DiscountPercent) / 100;
+                }
+            }
+
+            return discountAmount;
         }
     }
 }

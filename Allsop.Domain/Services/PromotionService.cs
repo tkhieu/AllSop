@@ -1,5 +1,6 @@
 ﻿using Allsop.Common.Cache;
 using Allsop.Common.Enums;
+using Allsop.Common.Exception;
 using Allsop.DataAccess.Contract.Repository;
 using Allsop.Service.Contract;
 using Allsop.Service.Contract.Model;
@@ -32,68 +33,58 @@ namespace Allsop.Domain.Services
             return promotions;
         }
 
-        public async Task<decimal> GetTotalDiscountAmount(ShoppingCart shoppingCart)
+        public async Task<decimal> GetDiscountAmountByVoucher(string voucher, decimal spendAmount, Promotion promotion)
         {
-            var totalDiscountAmount = 0m;
-            var promotions = await GetAllPromotionsAsync();
-
-            foreach (var promotion in promotions)
-            {
-                _ = promotion.PromotionType switch
-                {
-                    PromotionType.Amount => totalDiscountAmount +=
-                        await GetDiscountAmountByAmount(shoppingCart, promotion),
-                    PromotionType.Percent => totalDiscountAmount +=
-                        await GetDiscountAmountByPercent(shoppingCart, promotion),
-                    _ => totalDiscountAmount += await GetDiscountAmountByVoucher(shoppingCart, promotion)
-                };
-            };
-
-            return totalDiscountAmount;
-        }
-
-        public async Task<decimal> GetDiscountAmountByVoucher(ShoppingCart shoppingCart, Promotion promotion)
-        {
-            if (!string.Equals(shoppingCart.Voucher, promotion.Voucher, StringComparison.InvariantCultureIgnoreCase))
+            if (!string.Equals(voucher, promotion.Voucher, StringComparison.InvariantCultureIgnoreCase))
             {
                 return 0;
             }
 
-            if (shoppingCart.ShoppingCartItems.Sum(x => x.Amount) >= promotion.SpendAmount)
+            if (spendAmount >= promotion.SpendAmount)
             {
                 return promotion.DiscountAmount;
             }
 
-            return 0;
+            return 0m;
         }
 
-        public async Task<decimal> GetDiscountAmountByPercent(ShoppingCart shoppingCart, Promotion promotion)
+        public async Task<decimal> GetDiscountAmountByPercent(Guid categoryId, int spendQuantity, Promotion promotion)
         {
-            var items = shoppingCart.ShoppingCartItems.Where(x => x.CategoryId == promotion.CategoryId);
-            var discountAmount = 0m;
-
-            if (items.Sum(x => x.Quantity) >= promotion.SpendQuantity)
+            if (categoryId == promotion.CategoryId && spendQuantity >= promotion.SpendQuantity)
             {
-
-                foreach (var shoppingCartItem in items)
-                {
-                   discountAmount += (shoppingCartItem.Quantity * shoppingCartItem.Price * promotion.DiscountPercent) / 100;
-                }
+                return promotion.DiscountPercent;
             }
 
-            return discountAmount;
+            return 0m;
         }
 
-        public async Task<decimal> GetDiscountAmountByAmount(ShoppingCart shoppingCart, Promotion promotion)
+        public async Task<decimal> GetDiscountAmountByAmount(Guid categoryId, decimal spendAmount, Promotion promotion)
         {
-            var items = shoppingCart.ShoppingCartItems.Where(x => x.CategoryId == promotion.CategoryId);
-
-            if (items.Sum(x => x.Amount) >= promotion.SpendAmount)
+            if (categoryId == promotion.CategoryId && spendAmount >= promotion.SpendAmount)
             {
                 return promotion.DiscountAmount;
             }
 
-            return 0;
+            return 0m;
+        }
+
+        public Task<Promotion> GetPromotionByVoucherAsync(string voucher)
+        {
+            return _promotionRepository.GetPromotionByVoucherAsync(voucher);
+        }
+
+        public async Task<bool> CheckValidVoucherAsync(string voucher)
+        {
+            var promotions = await GetAllPromotionsAsync();
+            var promotion = promotions.FirstOrDefault(x =>
+                string.Equals(x.Voucher, voucher, StringComparison.InvariantCultureIgnoreCase));
+
+            if (promotion == null)
+            {
+                throw new InvalidVoucherException(voucher);
+            }
+
+            return true;
         }
     }
 }

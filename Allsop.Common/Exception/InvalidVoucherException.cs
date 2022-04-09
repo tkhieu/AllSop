@@ -1,8 +1,8 @@
 ﻿namespace Allsop.Common.Exception
 {
-    public class VoucherNotFoundException : BaseCustomException
+    public class InvalidVoucherException : BaseCustomException
     {
-        public VoucherNotFoundException(string voucher)
+        public InvalidVoucherException(string voucher)
             : base($"Voucher '{voucher}' does not exist.", Array.Empty<string>(), ErrorCode.InvalidId) { }
     }
 }
