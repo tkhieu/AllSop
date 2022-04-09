@@ -1,10 +1,11 @@
 Allsop API is used to demo business of shopping cart with these requirements
+
 Promotions:
- • Get 10% off bulk drinks – any drinks are 10% off the listed price (including already reduced 
+1. Get 10% off bulk drinks – any drinks are 10% off the listed price (including already reduced 
 items) when buying 10 or more
-• £5.00 off your order when spending £50.00 or more on Baking/Cooking Ingredients
-• £20.00 off your total order value when spending £100.00 or more and using the code 
-"20OFFPROMO"
+2. £5.00 off your order when spending £50.00 or more on Baking/Cooking Ingredients
+3. £20.00 off your total order value when spending £100.00 or more and using the code "20OFFPROMO"
+
 Use Cases:
 1. As a User I can view the products and their category, price and availability information.
 2. As a User I can add a product to my shopping cart.
