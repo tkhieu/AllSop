@@ -49,7 +49,8 @@ namespace Allsop.Domain.Services
                     Id = Guid.NewGuid(),
                     Quantity = quantity,
                     ProductId = productId,
-                    ShoppingCartId = shoppingCart.Id
+                    ShoppingCartId = shoppingCart.Id,
+                    CategoryId = product.CategoryId
                 };
 
                 shoppingCart.ShoppingCartItems.Add(item);
