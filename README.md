@@ -1,4 +1,4 @@
-Allsop API is used to demo business of shopping cart with these requirements
+Allsop API is used to demo business of shopping cart with below requirements:
 
 Promotions:
 1. Get 10% off bulk drinks – any drinks are 10% off the listed price (including already reduced 
