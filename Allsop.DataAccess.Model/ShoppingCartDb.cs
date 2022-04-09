@@ -17,6 +17,5 @@ namespace Allsop.DataAccess.Model
             }
         }
         public IList<ShoppingCartItemDb> ShoppingCartItems { get; set; }
-        public UserDb User { get; set; }
     }
 }

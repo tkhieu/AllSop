@@ -69,7 +69,7 @@ namespace Allsop.Domain.Services
 
         public async Task<decimal> GetDiscountAmountByPercent(ShoppingCart shoppingCart, Promotion promotion)
         {
-            var items = shoppingCart.ShoppingCartItems.Where(x => x.Product.CategoryId == promotion.CategoryId);
+            var items = shoppingCart.ShoppingCartItems.Where(x => x.CategoryId == promotion.CategoryId);
             var discountAmount = 0m;
 
             if (items.Sum(x => x.Quantity) >= promotion.SpendQuantity)
@@ -77,7 +77,7 @@ namespace Allsop.Domain.Services
 
                 foreach (var shoppingCartItem in items)
                 {
-                   discountAmount += (shoppingCartItem.Quantity * shoppingCartItem.Product.Price * promotion.DiscountPercent) / 100;
+                   discountAmount += (shoppingCartItem.Quantity * shoppingCartItem.Price * promotion.DiscountPercent) / 100;
                 }
             }
 
@@ -86,7 +86,7 @@ namespace Allsop.Domain.Services
 
         public async Task<decimal> GetDiscountAmountByAmount(ShoppingCart shoppingCart, Promotion promotion)
         {
-            var items = shoppingCart.ShoppingCartItems.Where(x => x.Product.CategoryId == promotion.CategoryId);
+            var items = shoppingCart.ShoppingCartItems.Where(x => x.CategoryId == promotion.CategoryId);
 
             if (items.Sum(x => x.Amount) >= promotion.SpendAmount)
             {

@@ -45,14 +45,7 @@ namespace Allsop.Domain.Tests.Services
                     {
                         Id = Guid.NewGuid(),
                         ProductId = _productId1,
-                        Quantity = 9,
-                        Product = new Product()
-                        {
-                            Id = _productId1,
-                            Price = 100,
-                            Quantity = 50,
-                            CategoryId = _percentDiscountCategryId
-                        }
+                        Quantity = 9
                     }
                 }
             }));
@@ -184,27 +177,13 @@ namespace Allsop.Domain.Tests.Services
                     {
                         Id = Guid.NewGuid(),
                         ProductId = _productId1,
-                        Quantity = 9,
-                        Product = new Product()
-                        {
-                            Id = _productId1,
-                            Price = 100,
-                            Quantity = 50,
-                            CategoryId = _percentDiscountCategryId
-                        }
+                        Quantity = 9
                     },
                     new ShoppingCartItem()
                     {
                         Id = Guid.NewGuid(),
                         ProductId = _productId2,
-                        Quantity = 1,
-                        Product = new Product()
-                        {
-                            Id = _productId2,
-                            Price = 100,
-                            Quantity = 50,
-                            CategoryId = _percentDiscountCategryId
-                        }
+                        Quantity = 1
                     }
                 }
             }));
@@ -233,14 +212,7 @@ namespace Allsop.Domain.Tests.Services
                     {
                         Id = Guid.NewGuid(),
                         ProductId = _productId1,
-                        Quantity = 9,
-                        Product = new Product()
-                        {
-                            Id = _productId1,
-                            Price = 100,
-                            Quantity = 50,
-                            CategoryId = _amountDiscountCategryId
-                        }
+                        Quantity = 9
                     }
                 }
             }));
@@ -269,14 +241,7 @@ namespace Allsop.Domain.Tests.Services
                     {
                         Id = Guid.NewGuid(),
                         ProductId = _productId1,
-                        Quantity = 3,
-                        Product = new Product()
-                        {
-                            Id = _productId1,
-                            Price = 20,
-                            Quantity = 50,
-                            CategoryId = _amountDiscountCategryId
-                        }
+                        Quantity = 3
                     }
                 }
             }));
@@ -305,14 +270,7 @@ namespace Allsop.Domain.Tests.Services
                     {
                         Id = Guid.NewGuid(),
                         ProductId = _productId1,
-                        Quantity = 10,
-                        Product = new Product()
-                        {
-                            Id = _productId1,
-                            Price = 20,
-                            Quantity = 0,
-                            CategoryId = Guid.NewGuid()
-                        }
+                        Quantity = 10
                     }
                 }
             }));

@@ -6,9 +6,9 @@ using Allsop.Service.Contract.Model;
 
 namespace Allsop.DataAccess.Repository.Repositories
 {
-    public class CategoryRepository : BaseRepository, ICategoryRepository
+    public class CategoryRepository : BaseRepository<ProductCatalogDbContext>, ICategoryRepository
     {
-        public CategoryRepository(AllsopDbContext dbContext, IMapperFactory mapperFactory) : base(dbContext, mapperFactory)
+        public CategoryRepository(ProductCatalogDbContext dbContext, IMapperFactory mapperFactory) : base(dbContext, mapperFactory)
         {
         }
 

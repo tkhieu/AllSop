@@ -33,13 +33,13 @@ namespace Allsop.Domain.Services
 
             if (item != null)
             {
-                if (item.Product.Quantity < quantity)
+                if (item.Quantity < quantity)
                 {
-                    throw new OutOfStockException(item.Product.Name);
+                    throw new OutOfStockException(item.ProductId.ToString());
                 }
 
                 item.Quantity += quantity;
-                item.Product.Quantity -= quantity;
+                item.Quantity -= quantity;
             }
             else
             {
@@ -48,7 +48,6 @@ namespace Allsop.Domain.Services
                     Id = Guid.NewGuid(),
                     Quantity = quantity,
                     ProductId = productId,
-                    Product = await _productService.GetProductAsync(productId),
                     ShoppingCartId = shoppingCart.Id
                 };
 
@@ -81,7 +80,7 @@ namespace Allsop.Domain.Services
             else
             {
                 item.Quantity -= quantity;
-                item.Product.Quantity += quantity;
+                item.Quantity += quantity;
             }
 
             shoppingCart.DiscountAmount = await _promotionService.GetTotalDiscountAmount(shoppingCart);

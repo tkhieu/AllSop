@@ -5,9 +5,8 @@ using NUnit.Framework;
 namespace Allsop.DataAccess.Tests
 {
     [TestFixture]
-    public class AllsopDbContextTests
+    public class ProductCatalogDbContextTests
     {
-        
         [Test]
         public async Task AddProducts_WithValidData_ShouldSaveSuccessfullyAsync()
         {
@@ -111,9 +110,9 @@ namespace Allsop.DataAccess.Tests
                 context.Products.Add(new ProductDb() { Id = id, Name = "Product 2" }));
         }
 
-        private AllsopDbContext CreateDbContext()
+        private ProductCatalogDbContext CreateDbContext()
         {
-            return DbContextFactory.CreateDbContext("testDb");
+            return DbContextFactory.CreateDbContext<ProductCatalogDbContext>("ProductCatalogTest");
         }
     }
 }

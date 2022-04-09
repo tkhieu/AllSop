@@ -8,16 +8,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Allsop.DataAccess.Repository.Repositories
 {
-    public class ShoppingCartRepository: BaseRepository, IShoppingCartRepository
+    public class ShoppingCartRepository: BaseRepository<ShoppingCartDbContext>, IShoppingCartRepository
     {
-        public ShoppingCartRepository(AllsopDbContext dbContext, IMapperFactory mapperFactory) : base(dbContext, mapperFactory)
+        public ShoppingCartRepository(ShoppingCartDbContext dbContext, IMapperFactory mapperFactory) : base(dbContext, mapperFactory)
         {
         }
 
         public async Task<ShoppingCart> GetShoppingCartAsync(Guid id)
         {
             var entity = await DbContext.ShoppingCarts
-                .Include(x => x.ShoppingCartItems).ThenInclude(x=>x.Product)
+                .Include(x => x.ShoppingCartItems)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (entity == null)
@@ -33,7 +33,7 @@ namespace Allsop.DataAccess.Repository.Repositories
         public async Task<ShoppingCart> GetShoppingCartByUserIdAsync(Guid userId)
         {
             var entity = await DbContext.ShoppingCarts
-                .Include(x=>x.ShoppingCartItems).ThenInclude(x=>x.Product)
+                .Include(x=>x.ShoppingCartItems)
                 .FirstOrDefaultAsync(x => x.UserId == userId);
 
             if (entity == null)
@@ -49,7 +49,7 @@ namespace Allsop.DataAccess.Repository.Repositories
         public async Task<IEnumerable<ShoppingCart>> GetAllShoppingCartsAsync()
         {
             var entities = await DbContext.ShoppingCarts
-                .Include(x => x.ShoppingCartItems).ThenInclude(x => x.Product).ToListAsync();
+                .Include(x => x.ShoppingCartItems).ToListAsync();
 
             if (!entities.Any())
             {

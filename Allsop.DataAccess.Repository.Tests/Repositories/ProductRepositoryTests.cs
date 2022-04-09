@@ -13,7 +13,7 @@ namespace Allsop.DataAccess.Repository.Tests.Repositories
     [TestFixture]
     public class ProductRepositoryTests
     {
-        private AllsopDbContext _dbContext;
+        private ProductCatalogDbContext _dbContext;
         private readonly Guid _id1 = Guid.NewGuid();
         private readonly Guid _id2 = Guid.NewGuid();
         private readonly Guid _id3 = Guid.NewGuid();
@@ -22,7 +22,7 @@ namespace Allsop.DataAccess.Repository.Tests.Repositories
         [SetUp]
         public async Task Setup()
         {
-            _dbContext = DbContextFactory.CreateDbContext(Guid.NewGuid().ToString());
+            _dbContext = DbContextFactory.CreateDbContext<ProductCatalogDbContext>(Guid.NewGuid().ToString());
         }
 
         [TearDown]
@@ -47,7 +47,7 @@ namespace Allsop.DataAccess.Repository.Tests.Repositories
             var id = _id3;
             var name = "New Product";
             var categoryId = Guid.NewGuid();
-            var repository = CreateProductRepository(DbContextFactory.CreateDbContext(Guid.NewGuid().ToString()));
+            var repository = CreateProductRepository(DbContextFactory.CreateDbContext<ProductCatalogDbContext>(Guid.NewGuid().ToString()));
             var product = await repository.CreateProductAsync(new Product() { Id = id, Name = name, CategoryId = categoryId, Category = new Category() { Id = categoryId, Name = "Test" } });
 
             Assert.IsNotNull(product);
@@ -58,7 +58,7 @@ namespace Allsop.DataAccess.Repository.Tests.Repositories
         [Test]
         public Task CreateProduct_WithEmptyId_ShouldThrowExceptionAsync()
         {
-            var repository = CreateProductRepository(DbContextFactory.CreateDbContext(Guid.NewGuid().ToString()));
+            var repository = CreateProductRepository(DbContextFactory.CreateDbContext<ProductCatalogDbContext>(Guid.NewGuid().ToString()));
             Assert.ThrowsAsync<InvalidArgumentException>(() => repository.CreateProductAsync(new Product() { Id = Guid.Empty }));
             return Task.CompletedTask;
         }
@@ -67,7 +67,7 @@ namespace Allsop.DataAccess.Repository.Tests.Repositories
         public async Task CreateProducts_WithValidData_ShouldCreateSuccessfullyAsync()
         {
             var categoryId = Guid.NewGuid();
-            var repository = CreateProductRepository(DbContextFactory.CreateDbContext(Guid.NewGuid().ToString()));
+            var repository = CreateProductRepository(DbContextFactory.CreateDbContext<ProductCatalogDbContext>(Guid.NewGuid().ToString()));
             var products = await repository.CreateProductsAsync(new List<Product>()
             {
                 new Product(){Id = Guid.NewGuid(), Name = "Product 1", CategoryId = categoryId, Category = new Category(){Id = categoryId , Name = "Test"} },
@@ -87,7 +87,7 @@ namespace Allsop.DataAccess.Repository.Tests.Repositories
             _dbContext.Products.Add(new ProductDb() { Id = id, Name = "Product 3", CategoryId = Guid.NewGuid() });
             await _dbContext.SaveChangesAsync();
 
-            var repository = CreateProductRepository(DbContextFactory.CreateDbContext(Guid.NewGuid().ToString()));
+            var repository = CreateProductRepository(DbContextFactory.CreateDbContext<ProductCatalogDbContext>(Guid.NewGuid().ToString()));
             var result = await repository.DeleteProductAsync(id);
 
             Assert.IsNotNull(result);
@@ -107,7 +107,7 @@ namespace Allsop.DataAccess.Repository.Tests.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        private ProductRepository CreateProductRepository(AllsopDbContext dbContext)
+        private ProductRepository CreateProductRepository(ProductCatalogDbContext dbContext)
         {
             var mapperFactoryMock = new Mock<IMapperFactory>();
 

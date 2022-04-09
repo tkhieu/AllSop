@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Allsop.DataAccess.Repository.Repositories
 {
-    public class ProductRepository : BaseRepository, IProductRepository
+    public class ProductRepository : BaseRepository<ProductCatalogDbContext>, IProductRepository
     {
-        public ProductRepository(AllsopDbContext dbContext, IMapperFactory mapperFactory) : base(dbContext, mapperFactory)
+        public ProductRepository(ProductCatalogDbContext dbContext, IMapperFactory mapperFactory) : base(dbContext, mapperFactory)
         {
         }
 

@@ -6,12 +6,12 @@ namespace Allsop.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ProductController : ControllerBase
+    public class ProductCatalogController : ControllerBase
     {
-        private readonly ILogger<ProductController> _logger;
+        private readonly ILogger<ProductCatalogController> _logger;
         private readonly IScopedMediator _scopedMediator;
 
-        public ProductController(ILogger<ProductController> logger, IScopedMediator scopedMediator)
+        public ProductCatalogController(ILogger<ProductCatalogController> logger, IScopedMediator scopedMediator)
         {
             _logger = logger;
             _scopedMediator = scopedMediator;
@@ -30,14 +30,6 @@ namespace Allsop.Api.Controllers
         public async Task<ActionResult> Categories()
         {
             var result = await _scopedMediator.Send(new GetAllCategoriesQuerys());
-
-            return Ok(result);
-        }
-
-        [HttpGet("Promotions")]
-        public async Task<ActionResult> Promotions()
-        {
-            var result = await _scopedMediator.Send(new GetAllPromotionsQuery());
 
             return Ok(result);
         }

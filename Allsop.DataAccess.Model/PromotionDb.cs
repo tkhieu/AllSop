@@ -12,6 +12,5 @@ namespace Allsop.DataAccess.Model
         public decimal SpendAmount { get; set; }
         public PromotionType PromotionType { get; set; }
         public Guid? CategoryId { get; set; }
-        public CategoryDb Category { get; set; }
     }
 }

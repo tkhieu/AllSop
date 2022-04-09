@@ -29,7 +29,6 @@ namespace Allsop.DataAccess.Repository.Mapper
             model.Quantity = entity.Quantity;
             model.ProductId = entity.ProductId;
             model.ShoppingCartId = entity.ShoppingCartId;
-            model.Product = _productMapper.From(entity.Product);
         }
     }
 }

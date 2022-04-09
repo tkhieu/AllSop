@@ -8,13 +8,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Allsop.DataAccess.Repository.Repositories.Base
 {
-    public abstract class BaseRepository
+    public abstract class BaseRepository<TContext> where TContext: BaseDbContext<TContext>
     {
-        protected AllsopDbContext DbContext { get; }
+        protected TContext DbContext { get; }
         protected IMapperFactory MapperFactory { get; }
 
         protected BaseRepository(
-            AllsopDbContext dbContext,
+            TContext dbContext,
             IMapperFactory mapperFactory)
         {
             DbContext = dbContext;

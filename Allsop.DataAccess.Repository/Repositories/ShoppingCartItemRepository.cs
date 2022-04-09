@@ -3,13 +3,12 @@ using Allsop.DataAccess.Contract.Repository;
 using Allsop.DataAccess.Model;
 using Allsop.DataAccess.Repository.Repositories.Base;
 using Allsop.Service.Contract.Model;
-using Allsop.Service.Contract.Model.Common;
 
 namespace Allsop.DataAccess.Repository.Repositories
 {
-    public class ShoppingCartItemRepository : BaseRepository, IShoppingCartItemRepository
+    public class ShoppingCartItemRepository : BaseRepository<ShoppingCartDbContext>, IShoppingCartItemRepository
     {
-        public ShoppingCartItemRepository(AllsopDbContext dbContext, IMapperFactory mapperFactory) : base(dbContext, mapperFactory)
+        public ShoppingCartItemRepository(ShoppingCartDbContext dbContext, IMapperFactory mapperFactory) : base(dbContext, mapperFactory)
         {
         }
 

@@ -5,16 +5,17 @@ namespace Allsop.Tests.Helpers
 {
     public static class DbContextFactory
     {
-        public static AllsopDbContext CreateDbContext(string dbName)
+        public static TContext CreateDbContext<TContext>(string dbName) where TContext : DbContext
         {
-            var options = BuildInMemoryDbOptions<AllsopDbContext>(dbName);
+            var options = BuildInMemoryDbOptions<TContext>(dbName);
+            var dbContext = (TContext)Activator.CreateInstance(typeof(TContext), options);
 
-            return new AllsopDbContext(options);
+            return dbContext;
         }
 
-        private static DbContextOptions<T> BuildInMemoryDbOptions<T>(string dbName) where T : DbContext
+        private static DbContextOptions<BaseDbContext<TContext>> BuildInMemoryDbOptions<TContext>(string dbName) where TContext: DbContext
         {
-            var options = new DbContextOptionsBuilder<T>()
+            var options = new DbContextOptionsBuilder<BaseDbContext<TContext>>()
                 .UseInMemoryDatabase(databaseName: dbName)
                 .Options;
 
