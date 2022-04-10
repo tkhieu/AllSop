@@ -1,5 +1,4 @@
 ﻿using Allsop.Common.Cache;
-using Allsop.Common.Enums;
 using Allsop.Common.Exception;
 using Allsop.DataAccess.Contract.Repository;
 using Allsop.Service.Contract;
